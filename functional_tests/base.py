@@ -4,7 +4,7 @@ from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.common.keys import Keys
 import time
-from collections.abc import Callable
+from typing import Callable
 from selenium.common.exceptions import WebDriverException
 
 MAX_WAIT = 5  # seconds

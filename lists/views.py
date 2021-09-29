@@ -1,7 +1,9 @@
 from django.shortcuts import render
+from .forms import TaskForm
 
 
 # Create your views here.
 
 def tasks_view(request):
-    return render(request, 'tasks.html')
+    form = TaskForm
+    return render(request, 'tasks.html', {'form': form})

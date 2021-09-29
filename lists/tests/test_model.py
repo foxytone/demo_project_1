@@ -20,9 +20,13 @@ class TaskModelTest(TestCase):
         task_2.full_clean()
         task_3.full_clean()
 
+        task_1.save()
+        task_2.save()
+        task_3.save()
+
         q_set = list(Task.objects.all())
 
-        self.assertEqual(len(q_set), 3)
+        self.assertEqual(len(q_set), 3, q_set)
 
         self.assertIn(task_1, q_set)
         self.assertIn(task_2, q_set)
