@@ -15,10 +15,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from .views import tasks_view
 
 # without lead-slash
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('auth/', include('authentication.urls')),
-    path('tasks/', include('lists.urls'))
+    path('', tasks_view, name='tasks view'),
 ]
