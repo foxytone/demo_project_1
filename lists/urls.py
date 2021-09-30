@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import tasks_view
+from .views import tasks_view, new_task
 
 # without lead-slash
 urlpatterns = [
     path('', tasks_view, name='tasks view'),
+    path('add_task', new_task, name='new task')
 ]

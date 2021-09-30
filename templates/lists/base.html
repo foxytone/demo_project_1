@@ -13,11 +13,17 @@
             <div class="text-center">
                 <h1>{% block header_text %}{% endblock %}</h1>
                 <form method="POST" action="{% block form_action %}{% endblock %}">
-                {{ form.text }}
+                    {{ form.text }}
                     {{ form.id }}
-                {% csrf_token %}
+                    {% csrf_token %}
                 </form>
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% block table %}
+            {% endblock %}
         </div>
     </div>
 </div>

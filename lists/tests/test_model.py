@@ -90,14 +90,14 @@ class ListModelTest(TestCase):
         self.assertEqual(list_3, q_set[2])
 
 
-    def cant_save_duplicated_lists(self):
+    def test_cant_save_duplicated_lists(self):
         text = 'Duplicated'
         List.objects.create(text=text)
         with self.assertRaises(ValidationError):
             list_2 = List(text=text)
             list_2.full_clean()
 
-    def cant_save_empty_list(self):
+    def test_cant_save_empty_list(self):
         with self.assertRaises(ValidationError):
             list_1 = List(text='')
             list_1.full_clean()
