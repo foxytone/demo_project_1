@@ -7,7 +7,7 @@ import time
 from typing import Callable
 from selenium.common.exceptions import WebDriverException
 
-MAX_WAIT = 5  # seconds
+MAX_WAIT = 2  # seconds
 
 
 class BaseTest(LiveServerTestCase):
@@ -36,7 +36,7 @@ class BaseTest(LiveServerTestCase):
                 return fn()
             except (AssertionError, WebDriverException) as e:
                 if time.time() - start_time > MAX_WAIT:
-                    raise e
+                    raise (e, 'probably need to increase MAX_WAIT + ')
                 time.sleep(0.1)
 
 

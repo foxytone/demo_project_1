@@ -1,0 +1,13 @@
+{% extends "lists/base.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Registration{% endblock %}
+<br>
+{% block header_text %}<br>Registration{% endblock %}
+{% block form_block %}
+    <hr>
+    <form method="POST" class="form-group">
+        {{ form|crispy }}
+        {% csrf_token %}
+        <button class="btn btn-success">Register</button>
+    </form>
+{% endblock %}

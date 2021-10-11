@@ -18,7 +18,8 @@ from django.urls import path, include
 
 # without lead-slash
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    # path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
-    path('tasks/', include('lists.urls'))
+    path('tasks/', include('lists.urls')),
+    path('', include('django.contrib.auth.urls')),
 ]
