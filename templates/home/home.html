@@ -1,0 +1,14 @@
+{% extends "lists/base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block header_text %}
+    <h1 id="header">Hello! :) This is your simple To-Do app!<br>
+        {% if user.is_authenticated %}
+            Please, check you tasks <a href="{% url 'task_page' %}">here</a>
+        {% else %}
+
+            Please, <a href="{% url 'login' %}">login</a> or <a href="{% url 'register_page' %}">register</a> to start
+            use
+            your tasks!
+        {% endif %}
+    </h1>
+{% endblock %}

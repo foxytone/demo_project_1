@@ -1,23 +1,32 @@
+import time
+from typing import Callable, Dict
+
 from django.test import LiveServerTestCase
 from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webelement import WebElement
-from selenium.webdriver.common.keys import Keys
-import time
-from typing import Callable
-from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 
-MAX_WAIT = 2  # seconds
+MAX_WAIT = 1  # seconds
 
 
 class BaseTest(LiveServerTestCase):
-    browser: webdriver.Firefox
+    browser: webdriver.Chrome
+
+    # Users
+    MisterJones = {'username': 'MisterJones',
+                   'password': 'MakeLoveNotWar1984'}
+
+    Neo = {'username': 'Neo',
+           'password': 'ThereIsNoSp00n'}
 
 
     def setUp(self) -> None:
-        options = FirefoxOptions()
+        options = ChromeOptions()
         options.add_argument('--headless')
-        self.browser = webdriver.Firefox(options=options)
+        self.browser = webdriver.Chrome(options=options)
 
 
     def tearDown(self) -> None:
@@ -29,14 +38,20 @@ class BaseTest(LiveServerTestCase):
         inputbox.send_keys(Keys.ENTER)
 
 
-    def wait_for(self, fn: Callable[[], None]) -> None:
+    def wait_for(self, fn: Callable[[], None]):
         start_time = time.time()
         while True:
             try:
                 return fn()
-            except (AssertionError, WebDriverException) as e:
+            except Exception as e:
                 if time.time() - start_time > MAX_WAIT:
-                    raise (e, 'probably need to increase MAX_WAIT + ')
+                    print(
+                        '\n****************************************************************************************\n')
+                    print(self.browser.page_source)
+                    print(
+                        '\n****************************************************************************************\n')
+
+                    raise e
                 time.sleep(0.1)
 
 
@@ -53,3 +68,28 @@ class BaseTest(LiveServerTestCase):
                 if time.time() - start_time > MAX_WAIT:
                     raise e
                 time.sleep(0.1)
+
+
+    def register_user(self, user: Dict[str, str]) -> None:
+        self.browser.get(self.live_server_url + '/auth/register/')
+
+        username_field = self.browser.find_element_by_id('id_username')
+        username_field.send_keys(user['username'])
+
+        pass1_field = self.browser.find_element_by_id('id_password1')
+        pass1_field.send_keys(user['password'])
+
+        pass2_field = self.browser.find_element_by_id('id_password2')
+        self.send_info(pass2_field, user['password'])
+
+
+    def login_user(self, browser, user: Dict[str, str]) -> None:
+        browser.get(self.live_server_url + '/login/')
+
+        self.wait_for(lambda: browser.find_element_by_id('id_username'))
+
+        username_field = browser.find_element_by_id('id_username')
+        username_field.send_keys(user['username'])
+
+        pass1_field = browser.find_element_by_id('id_password')
+        self.send_info(pass1_field, user['password'])

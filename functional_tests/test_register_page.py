@@ -59,20 +59,13 @@ class TestRegisterPage(BaseTest):
         self.wait_for(lambda: self.browser.find_element_by_id('error_1_id_password2'))
 
 
-    def test_can_register_proper_user(self):
-        self.browser.get(self.register_url)
-
-        user = 'MisterJones'
-        password = ('MakeLoveNotWar1984')
-
-        username_field = self.browser.find_element_by_id('id_username')
-        username_field.send_keys(user)
-
-        pass1_field = self.browser.find_element_by_id('id_password1')
-        pass1_field.send_keys(password)
-
-        pass2_field = self.browser.find_element_by_id('id_password2')
-        self.send_info(pass2_field, password)
+    def test_can_register_proper_user_and_redirect_into_task_page(self):
+        self.register_user(self.MisterJones)
 
         self.wait_for(lambda: self.browser.find_element_by_id('account_navbar'))
-        self.wait_for(lambda: self.assertTrue(self.browser.find_element_by_id('account_navbar').text == user))
+        self.wait_for(lambda: self.assertTrue(
+            self.browser.find_element_by_id('account_navbar').text == self.MisterJones['username']))
+
+        header = self.browser.find_element_by_id('header')
+        self.assertTrue(header.text == "No task lists found! Maybe you should create one?")
+        self.assertRegex(expected_regex='/tasks', text=self.browser.current_url)

@@ -1,11 +1,41 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% block title %}Tasks{% endblock %}
-{% block header_text %} My tasks {% endblock %}
+{% block header_text %}<h1><br>{{ header }}</h1>{% endblock %}
 {% block form_action %}{% url 'new task' %}{% endblock %}
-{% block table %}
-    <td>
-    {% for task in tasks %}
-        <tr> {{ forloop.counter }}task</tr>
-    {% endfor %}
-    </td>
+{% block content_block %}
+    <br>
+    <div class="row">
+        <div class="col-md-3" id="nav_task">
+            <form method="POST" action="add_list" class="form-group no-border">
+                {% csrf_token %}
+                {{ form_list|crispy }}
+            </form>
+            <ul class="nav flex-column text-wrap">
+                {% for list in lists %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="list{{ forloop.counter0 }}" id="id_list{{ forloop.counter0 }}">
+                            <span class="d-inline-block text-truncate" style="max-width: 160px;">
+                                {{ list.text }}
+                            </span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col-md-8">
+            <form method="post" class="form-group" action="add_task{{ active }}">
+                {% csrf_token %}
+                {{ form_task }}
+            </form>
+            <table class="table table-sm">
+                {% for task in tasks_list %}
+                    {% cycle 'table-primary' 'table-default' as color silent %}
+                    <tr>
+                        <td class="{{ color }}" id="task{{ forloop.counter0 }}">{{ task.text }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 {% endblock %}

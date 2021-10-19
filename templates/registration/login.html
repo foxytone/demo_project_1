@@ -1,7 +1,7 @@
 {% extends 'lists/base.html' %}
 {% block  title %}Login{% endblock %}
 {% load crispy_forms_tags %}
-{% block header_text %}<br>Login<hr>{% endblock %}
+{% block header_text %}<h1><br>Login<hr></h1>{% endblock %}
 {% block form_block %}
     <form method="POST" class="form-group" id="register_form">
         {% csrf_token %}

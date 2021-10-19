@@ -1,0 +1,6 @@
+div[id="main_container"]{
+    max-width: 2000px;
+}
+div[id="nav_task"]{
+    max-width: 300px;
+}

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% block title %}Tasks{% endblock %}
+{% block header_text %}<h1 id="header"><br>{{ header }}</h1>{% endblock %}
+{% block form_action %}{% url 'new task' %}{% endblock %}
+{% block content_block %}
+    <br>
+    <div class="row">
+        <div class="col-md-3" id="nav_task">
+            <form method="POST" action="add_list" class="form-group no-border">
+                {% csrf_token %}
+                {{ form_list|crispy }}
+            </form>
+        </div>
+    </div>
+{% endblock %}

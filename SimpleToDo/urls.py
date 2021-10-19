@@ -15,11 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from lists.views import home
 
 # without lead-slash
 urlpatterns = [
     # path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('tasks/', include('lists.urls')),
+    path('', home, name='home_page'),
     path('', include('django.contrib.auth.urls')),
 ]
