@@ -2,7 +2,7 @@ from typing import Dict
 from django.contrib.auth.models import User
 from .base import BaseTest
 from ..forms import TaskForm, ListForm, ERROR_MESSAGE_EMPTY_TASK_FIELD, ERROR_MESSAGE_DUPLICATED_TASK, \
-    ERROR_MESSAGE_EMPTY_LIST_FIELD
+    ERROR_MESSAGE_EMPTY_LIST_FIELD, ERROR_MESSAGE_DUPLICATED_LIST
 from ..models import Task, List
 
 
@@ -11,7 +11,6 @@ class TaskFormTest(BaseTest):
         form = TaskForm(for_list=self.create_new_list('Matrix', self.Neo))
         
         self.assertIn('placeholder="Enter your task here"', form.as_p())
-        self.assertIn('class="form-control input-lg', form.as_p())
         self.assertIn('id="task_form"', form.as_p())
     
     
@@ -137,7 +136,7 @@ class ListFormTest(BaseTest):
         
         form = ListForm(data={'text': 'Matrix'}, user=self.get_user(self.Neo))
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors['text'], [ERROR_MESSAGE_DUPLICATED_TASK])
+        self.assertEqual(form.errors['text'], [ERROR_MESSAGE_DUPLICATED_LIST])
     
     
     def test_form_can_save_proper_list(self):

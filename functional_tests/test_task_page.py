@@ -259,8 +259,8 @@ class TestTaskPage(BaseTest):
         task1 = self.browser.find_element_by_id('task0')
         task2 = self.browser.find_element_by_id('task1')
         
-        self.assertTrue(task1.text == task3_name)
-        self.assertTrue(task2.text == task4_name)
+        self.assertTrue(task1.text == task4_name)
+        self.assertTrue(task2.text == task3_name)
         
         # no other tasks
         with self.assertRaises(WebDriverException):
