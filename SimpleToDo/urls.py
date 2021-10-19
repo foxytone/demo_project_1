@@ -16,6 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from lists.views import home
+from authentication.views import login_
+import django.contrib.auth.urls
 
 # without lead-slash
 urlpatterns = [
@@ -23,5 +25,6 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('tasks/', include('lists.urls')),
     path('', home, name='home_page'),
+    path('login/', login_, name='login'),
     path('', include('django.contrib.auth.urls')),
 ]

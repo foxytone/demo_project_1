@@ -1,11 +1,9 @@
 import time
 from typing import Callable, Dict
-
 from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 
@@ -83,13 +81,13 @@ class BaseTest(LiveServerTestCase):
         self.send_info(pass2_field, user['password'])
 
 
-    def login_user(self, browser, user: Dict[str, str]) -> None:
-        browser.get(self.live_server_url + '/login/')
+    def login_user(self, user: Dict[str, str]) -> None:
+        self.browser.get(self.live_server_url + '/login/')
 
-        self.wait_for(lambda: browser.find_element_by_id('id_username'))
+        self.wait_for(lambda: self.browser.find_element_by_id('id_username'))
 
-        username_field = browser.find_element_by_id('id_username')
+        username_field = self.browser.find_element_by_id('id_username')
         username_field.send_keys(user['username'])
 
-        pass1_field = browser.find_element_by_id('id_password')
+        pass1_field = self.browser.find_element_by_id('id_password')
         self.send_info(pass1_field, user['password'])
