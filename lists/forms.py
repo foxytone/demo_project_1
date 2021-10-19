@@ -8,6 +8,8 @@ ERROR_MESSAGE_EMPTY_TASK_FIELD = "Task can't be empty"
 ERROR_MESSAGE_DUPLICATED_TASK = 'You already have this task'
 ERROR_MESSAGE_DUPLICATED_LIST = "You already have this list"
 ERROR_MESSAGE_EMPTY_LIST_FIELD = "List can't be empty"
+ERROR_MESSAGE_MAXIMUM_TASKS_REACHED = "You've reached maximum tasks of 30. Delete one for adding new task"
+ERROR_MESSAGE_MAXIMUM_LISTS_REACHED = "You've reached maximum lists of 20. Delete one for adding new list"
 
 
 class TaskForm(forms.ModelForm):
@@ -43,6 +45,19 @@ class TaskForm(forms.ModelForm):
             self._update_errors(e)
     
     
+    def is_valid(self) -> bool:
+        return super(TaskForm, self).is_valid() & self._not_valid_if_max_tasks_reached()
+    
+    
+    def _not_valid_if_max_tasks_reached(self) -> bool:
+        length = len(Task.objects.filter(list=self.instance.list))
+        if length > 29:
+            e = ValidationError({'text': [ERROR_MESSAGE_MAXIMUM_TASKS_REACHED, ]})
+            self._update_errors(e)
+            return False
+        return True
+    
+    
     def save(self):
         return forms.ModelForm.save(self)
 
@@ -73,6 +88,18 @@ class ListForm(forms.ModelForm):
         except ValidationError as e:
             e.error_dict = {'text': [ERROR_MESSAGE_DUPLICATED_LIST], }
             self._update_errors(e)
+    
+    
+    def is_valid(self):
+        return super(ListForm, self).is_valid() & self._not_valid_if_max_lists_reached()
+    
+    
+    def _not_valid_if_max_lists_reached(self) -> bool:
+        length = len(List.objects.filter(user=self.instance.user))
+        if length > 19:
+            self._update_errors(ValidationError({'text': ERROR_MESSAGE_MAXIMUM_LISTS_REACHED}))
+            return False
+        return True
     
     
     def save(self):

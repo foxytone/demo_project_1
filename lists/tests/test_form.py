@@ -2,7 +2,8 @@ from typing import Dict
 from django.contrib.auth.models import User
 from .base import BaseTest
 from ..forms import TaskForm, ListForm, ERROR_MESSAGE_EMPTY_TASK_FIELD, ERROR_MESSAGE_DUPLICATED_TASK, \
-    ERROR_MESSAGE_EMPTY_LIST_FIELD, ERROR_MESSAGE_DUPLICATED_LIST
+    ERROR_MESSAGE_EMPTY_LIST_FIELD, ERROR_MESSAGE_DUPLICATED_LIST, ERROR_MESSAGE_MAXIMUM_LISTS_REACHED, \
+    ERROR_MESSAGE_MAXIMUM_TASKS_REACHED
 from ..models import Task, List
 
 
@@ -96,6 +97,43 @@ class TaskFormTest(BaseTest):
         tasks = list(Task.objects.all())
         self.assertEqual(len(tasks), 2)
         self.assertEqual(tasks[0].text, tasks[1].text)
+    
+    
+    def test_cant_add_more_than_30_tasks(self):
+        list1 = self.create_new_list('mamba', self.Neo)
+        
+        # add 29 useless tasks
+        for i in range(0, 29):
+            self.create_new_task(tasktext='task' + str(i), list_=list1)
+        
+        # add 30th task
+        form = TaskForm(data={'text': 'hi'}, for_list=list1)
+        
+        # check form is ok
+        self.assertTrue(form.is_valid())
+        form.save()
+        
+        # check form is not ok with 31 task
+        form = TaskForm(data={'text': 'hi again'}, for_list=list1)
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [ERROR_MESSAGE_MAXIMUM_TASKS_REACHED], form.errors)
+        
+        # remove one task
+        Task.objects.filter(list=list1)[5].delete()
+        
+        # create new form
+        form = TaskForm(data={'text': 'hi again'}, for_list=list1)
+        
+        # and now it should be valid
+        self.assertTrue(form.is_valid())
+        form.save()
+        
+        # checkout for next list
+        
+        list2 = self.create_new_list('list2', self.Neo)
+        
+        form = TaskForm(data={'text': 'hi again'}, for_list=list2)
+        self.assertTrue(form.is_valid())
 
 
 class ListFormTest(BaseTest):
@@ -183,3 +221,29 @@ class ListFormTest(BaseTest):
         self.assertEqual(len(lists), 2)
         self.assertEqual(lists[0].text, lists[1].text)
         self.assertEqual(lists[0].text, text)
+    
+    
+    def test_cant_add_more_than_20_lists(self):
+        # create 19 useless lists
+        for i in range(0, 19):
+            self.create_new_list(listtext='list' + str(i), user=self.Neo)
+        
+        # create 20th list and check it
+        form = ListForm(data={'text': 'hi'}, user=User.objects.get(username=self.Neo['username']))
+        self.assertTrue(form.is_valid())
+        form.save()
+        
+        # 21
+        form = ListForm(data={'text': 'hi again'}, user=User.objects.get(username=self.Neo['username']))
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [ERROR_MESSAGE_MAXIMUM_LISTS_REACHED])
+        
+        # remove one list
+        List.objects.filter(user=User.objects.get(username=self.Neo['username']))[5].delete()
+        
+        # create new form
+        form = ListForm(data={'text': 'hi again'}, user=User.objects.get(username=self.Neo['username']))
+        
+        # and now it should be valid
+        self.assertTrue(form.is_valid())
+        form.save()

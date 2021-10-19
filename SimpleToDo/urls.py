@@ -25,6 +25,6 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('tasks/', include('lists.urls')),
     path('', home, name='home_page'),
-    path('login/', login_, name='login'),
+    #path('login/', login_, name='login'),
     path('', include('django.contrib.auth.urls')),
 ]
