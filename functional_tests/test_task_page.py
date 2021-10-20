@@ -1,5 +1,6 @@
 from .base import BaseTest
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.keys import Keys
 
 
 # TODO: add errors pop up and remove function for tasks and lists and limit for tasks and lists
@@ -48,7 +49,7 @@ class TestTaskPage(BaseTest):
         
         # check for this list
         list1 = self.wait_for(lambda: self.browser.find_element_by_id('id_list0'))
-        self.assertTrue(list1.text == first_list_name)
+        self.assertTrue(list1.text == first_list_name + '\nX', list1.text)
         
         # add task
         first_task_name = 'My first task!'
@@ -81,8 +82,8 @@ class TestTaskPage(BaseTest):
         # check for 2 lists
         list0 = self.wait_for(lambda: self.browser.find_element_by_id('id_list0'))
         list1 = self.browser.find_element_by_id('id_list1')
-        self.assertTrue(list1.text == first_list_name)
-        self.assertTrue(list0.text == second_list_name)
+        self.assertTrue(list1.text == first_list_name + '\nX')
+        self.assertTrue(list0.text == second_list_name + '\nX')
         
         # check tasks is empty
         with self.assertRaises(WebDriverException):
@@ -117,8 +118,8 @@ class TestTaskPage(BaseTest):
         
         list1 = self.wait_for(lambda: self.browser.find_element_by_id('id_list1'))
         list0 = self.browser.find_element_by_id('id_list0')
-        self.assertTrue(list1.text == first_list_name)
-        self.assertTrue(list0.text == second_list_name)
+        self.assertTrue(list1.text == first_list_name + '\nX')
+        self.assertTrue(list0.text == second_list_name + '\nX')
         
         # check that third task is not exist here
         with self.assertRaises(WebDriverException):
@@ -146,7 +147,7 @@ class TestTaskPage(BaseTest):
         
         # check for this list
         list1 = self.wait_for(lambda: self.browser.find_element_by_id('id_list0'))
-        self.assertTrue(list1.text == first_list_name)
+        self.assertTrue(list1.text == first_list_name + '\nX')
         
         # add task
         first_task_name = 'GloryToAstortzka'
@@ -179,8 +180,8 @@ class TestTaskPage(BaseTest):
         # check for 2 lists
         list0 = self.wait_for(lambda: self.browser.find_element_by_id('id_list0'))
         list1 = self.browser.find_element_by_id('id_list1')
-        self.assertTrue(list1.text == first_list_name)
-        self.assertTrue(list0.text == second_list_name)
+        self.assertTrue(list1.text == first_list_name + '\nX')
+        self.assertTrue(list0.text == second_list_name + '\nX')
         
         # check tasks is empty
         with self.assertRaises(WebDriverException):
@@ -215,8 +216,8 @@ class TestTaskPage(BaseTest):
         
         list1 = self.wait_for(lambda: self.browser.find_element_by_id('id_list1'))
         list0 = self.browser.find_element_by_id('id_list0')
-        self.assertTrue(list1.text == first_list_name)
-        self.assertTrue(list0.text == second_list_name)
+        self.assertTrue(list1.text == first_list_name + '\nX')
+        self.assertTrue(list0.text == second_list_name + '\nX')
         
         # check that third task is not exist here
         with self.assertRaises(WebDriverException):
@@ -225,7 +226,7 @@ class TestTaskPage(BaseTest):
     
     def test_check_for_non_existent_list(self):
         # try to open non-existing list
-        self.browser.get(self.tasks_url + 'list42')
+        self.browser.get(self.tasks_url + 'switch_list42')
         
         # if tasklist is empty we are expecting a clear tasks page:
         header = self.wait_for(lambda: self.browser.find_element_by_id('header'))
@@ -249,7 +250,7 @@ class TestTaskPage(BaseTest):
         self.create_new_task(task4_name)
         
         # try to open non-existing list again
-        self.browser.get(self.tasks_url + 'list42')
+        self.browser.get(self.tasks_url + 'switch_list42')
         
         # expecting last created list
         header = self.wait_for(lambda: self.browser.find_element_by_id('header'))
@@ -374,39 +375,81 @@ class TestTaskPage(BaseTest):
         # check for error
         error = self.browser.find_element_by_id('error_1_id_text')
         self.assertTrue(error.text == "You already have this task", error.text)
-
-
+    
+    
     def test_maximum_20_lists(self):
         # create 19 useless lists
         for i in range(0, 19):
             self.create_new_list('list' + str(i))
-    
+        
         # check all 19 in list
         for i in range(0, 19):
             self.wait_for(lambda: self.browser.find_element_by_id('id_list' + str(i)))
-    
+        
         # add 20th list
         self.create_new_list('list42')
-    
+        
         # check all is good
         self.wait_for(lambda: self.browser.find_element_by_id('id_list19'))
-    
+        
         # try to add another task
         self.create_new_list('list43')
-    
+        
         # and cant find it in list
         with self.assertRaises(WebDriverException):
             self.wait_for(lambda: self.browser.find_element_by_id('id_list20'))
-    
+        
         # but error is right here
         error = self.browser.find_element_by_id('error_1_id_text')
         self.assertTrue(error.text == "You've reached maximum lists of 20. Delete one for adding new list")
-    
+        
         self.browser.get(self.tasks_url)
         # and here must be 2 errors
         self.create_new_list('list10')
         error1 = self.wait_for(lambda: self.browser.find_element_by_id('error_1_id_text'))
         error2 = self.browser.find_element_by_id('error_2_id_text')
-    
+        
         self.assertTrue(error1.text == "You already have this list")
         self.assertTrue(error2.text == "You've reached maximum lists of 20. Delete one for adding new list")
+    
+    
+    def test_lists_removes_correctly(self):
+        self.browser.get(self.tasks_url)
+        
+        # create a new list and remove it
+        self.create_new_list('One')
+        button = self.wait_for(lambda: self.browser.find_element_by_id('button0'))
+        button.click()
+        
+        # check all is good
+        header = self.wait_for(lambda: self.browser.find_element_by_id('header'))
+        self.assertTrue(header.text == "No task lists found! Maybe you should create one?")
+        
+        # create same list
+        self.create_new_list('One')
+        list_name = self.wait_for(lambda: self.browser.find_element_by_id('id_list0'))
+        self.assertTrue(list_name.text == 'One\nX')
+        
+        # create few tasks
+        task1 = 'Take red pill'
+        task2 = 'Return to farm'
+        
+        self.create_new_task(task1)
+        self.create_new_task(task2)
+        
+        # check all tasks in the list
+        t1 = self.wait_for(lambda: self.browser.find_element_by_id('task0'))
+        t2 = self.browser.find_element_by_id('task1')
+        
+        self.assertTrue(t1.text == task2)
+        self.assertTrue(t2.text == task1)
+        
+        # remove this list
+        self.browser.find_element_by_id('button0').click()
+        
+        # create same list again
+        self.create_new_list('One')
+        
+        # no tasks there
+        with self.assertRaises(WebDriverException):
+            self.wait_for(lambda: self.browser.find_element_by_id('task0'))

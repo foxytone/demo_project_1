@@ -8,26 +8,6 @@ from .forms import TaskForm, ListForm
 from .models import List, Task
 
 
-def _get_lists_and_current_list_number(request: HttpRequest, list_id: int) -> Tuple[List_[List], int]:
-    """Returns user's lists list and current list user wants to modify if list_id is correct
-    else returns user's lists and 0"""
-    
-    lists = List.objects.filter(user=request.user).order_by('-id')
-    
-    # try to get correct list. If failed - returns 0
-    return (lists, list_id) if len(lists) > list_id else (lists, 0)
-
-
-def _initialize_forms_if_needed(form_task: TaskForm, form_list: ListForm, for_list: List, user: User) -> Tuple[
-    TaskForm, ListForm]:
-    if form_task is None:
-        form_task = TaskForm(for_list=for_list)
-    if form_list is None:
-        form_list = ListForm(user=user)
-    
-    return form_task, form_list
-
-
 @login_required()
 def new_task(request: HttpRequest, list_id: str) -> HttpResponse:
     """list_id = id of ordered by id lists of this user
@@ -120,3 +100,29 @@ def remove_list(request: HttpRequest, list_id: str) -> HttpResponse:
     delete_list(lists, removed_list)
     
     return view_for_no_lists(request) if len(lists) == 0 else task_page_handler(request, lists, 0)
+
+
+# better do not touch this
+def _get_lists_and_current_list_number(request: HttpRequest, list_id: int) -> Tuple[List_[List], int]:
+    """Returns user's lists list and current list user wants to modify if list_id is correct
+    else returns user's lists and 0"""
+    
+    lists = List.objects.filter(user=request.user).order_by('-id')
+    
+    # try to get correct list. If failed - returns 0
+    try:
+        lists[list_id]
+        active_list = list_id
+    except:
+        active_list = 0
+    return lists, active_list
+
+
+def _initialize_forms_if_needed(form_task: TaskForm, form_list: ListForm, for_list: List, user: User) -> Tuple[
+    TaskForm, ListForm]:
+    if form_task is None:
+        form_task = TaskForm(for_list=for_list)
+    if form_list is None:
+        form_list = ListForm(user=user)
+    
+    return form_task, form_list
