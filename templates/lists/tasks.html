@@ -13,11 +13,17 @@
             </form>
             <ul class="nav flex-column text-wrap">
                 {% for list in lists %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="list{{ forloop.counter0 }}" id="id_list{{ forloop.counter0 }}">
-                            <span class="d-inline-block text-truncate" style="max-width: 160px;">
+                    <li class="nav-item" {% if forloop.counter0 == active %}id="active"{% endif %}>
+                        <a class="nav-link{% if forloop.counter0 == active %} active{% endif %}"
+                           href="switch_list{{ forloop.counter0 }}" id="id_list{{ forloop.counter0 }}">
+                            <span class="d-inline-block text-truncate" style="max-width: 160px;" id="span">
                                 {{ list.text }}
                             </span>
+
+                            <form class="float-right" action="remove_list{{ forloop.counter0 }}">
+                                <button type="submit" class="btn btn-outline-danger float-right" id="button">X
+                                </button>
+                            </form>
                         </a>
                     </li>
                 {% endfor %}
