@@ -76,5 +76,5 @@ class TestLoginPage(BaseTest):
         self.browser.get(self.login_url)
         
         header = self.wait_for(lambda: self.browser.find_element_by_id('header'))
-        self.assertTrue(header.text == 'Hello! :) This is your simple To-Do app!\nPlease, check you tasks here',
+        self.assertTrue(header.text == 'No task lists found! Maybe you should create one?',
                         header.text)

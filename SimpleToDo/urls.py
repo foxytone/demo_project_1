@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from lists.views import home
 from authentication.views import login_
-import django.contrib.auth.urls
+from django.contrib.auth import views as auth_views
 
 # without lead-slash
 urlpatterns = [
@@ -25,6 +25,9 @@ urlpatterns = [
     path('auth/', include('authentication.urls')),
     path('tasks/', include('lists.urls')),
     path('', home, name='home_page'),
-    #path('login/', login_, name='login'),
+    # path('login/', login_, name='login'),
+    path('login/',
+         auth_views.LoginView.as_view(template_name="registration/login.html", redirect_authenticated_user=True),
+         name='login'),
     path('', include('django.contrib.auth.urls')),
 ]
