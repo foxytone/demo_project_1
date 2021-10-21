@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
-from typing import Tuple, Dict
+from typing import Dict
 from ..models import List, Task
+from ..support import set_active_user_list
 
 
 class BaseTest(TestCase):
@@ -9,37 +10,37 @@ class BaseTest(TestCase):
     # username, password
     MisterJones = {'username': 'MisterJones', 'password': 'MakeLoveNotWar1984'}
     Neo = {'username': 'Neo', 'password': 'ThereIsNoSp00n'}
-
+    
     all_pattern = '(.|\n)'
-
-
+    
+    
     def setUp(self) -> None:
         self.register_user(self.MisterJones)
         self.register_user(self.Neo)
-
-
+    
+    
     def register_user(self, user: Dict[str, str]) -> None:
         new_user = User.objects.create(username=user['username'])
         new_user.set_password(user['password'])
         new_user.save()
-
-
+    
+    
     def login(self, user: Dict[str, str]) -> None:
         self.client.login(username=user['username'], password=user['password'])
-
-
+    
+    
     def create_new_list(self, listtext: str, user: Dict[str, str]) -> List:
         current_user = User.objects.get(username=user['username'])
         return List.objects.create(text=listtext, user=current_user)
-
-
+    
+    
     def create_new_task(self, tasktext: str, list_: List) -> Task:
         return Task.objects.create(text=tasktext, list=list_)
-
-
+    
+    
     def page_correct_tags(self, html: str) -> None:
         uni_pattern_for_pair_tags = '[^>]*>.*(.|\n)*</'
-
+        
         self.assertTrue(html.startswith('<!DOCTYPE html>'), 'page doesnt start with DOCTYPE ')
         self.assertIn('<title>Tasks</title>', html)
         self.assertRegex(expected_regex=f'<html{uni_pattern_for_pair_tags}html>', text=html,
@@ -48,3 +49,19 @@ class BaseTest(TestCase):
                          msg="cant find <body>")
         self.assertRegex(expected_regex=f'<h1{uni_pattern_for_pair_tags}h1>', text=html, msg="cant find header")
         self.assertRegex(expected_regex=f'<nav{uni_pattern_for_pair_tags}nav', text=html)
+    
+    
+    def get_user(self, user: Dict[str, str]) -> User:
+        return User.objects.filter(username=user['username']).first()
+    
+    def update_bd(self, user: Dict[str, str]) -> None:
+        # class for emulating request.user
+        class Request:
+            def __init__(self, user):
+                self.user = user
+        
+        # add info to db
+        request = Request
+        request.user = self.get_user(self.MisterJones)
+        set_active_user_list(request, 0, increment_lists=True)
+        

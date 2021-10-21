@@ -10,7 +10,7 @@ span[class="d-inline-block text-truncate"] {
     padding-top: 8px;
 }
 
-li[class="nav-item"] {
+div[id="nav_task"] li[class="nav-item"] {
     border-color: #b8daff !important;
     border-top-color: transparent;
     border-top-style: solid;
@@ -33,13 +33,28 @@ li[class="nav-item"] {
     margin-bottom: 5px;
 }
 
-li[id="active"] {
+div[id="nav_task"] li[id="active"] {
     background-color: #b8daff !important;
 }
 
 a[class="nav-link active"] {
     color: black !important;
 }
-button[type="submit"]{
+
+form[id="remove_list_form"] button[type="submit"] {
     margin-right: -8px;
+}
+
+form[id="remove_task_form"] button[type="submit"] {
+    padding: 1px 7px;
+    font-size: 13px;
+}
+
+form[id="mark_task_form"] button[type="submit"] {
+    padding: 1px 7px;
+    font-size: 13px;
+}
+
+span[id="task_text"] {
+    padding: 10px;
 }

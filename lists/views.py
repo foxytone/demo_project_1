@@ -1,40 +1,22 @@
-from typing import Tuple, List as List_
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
-
 from .forms import TaskForm, ListForm
-from .models import List, Task
+from .support import remove_user, set_active_user_list, get_active_user_list_and_lists_count, \
+    initialize_forms_if_needed, get_ordered_lists, get_ordered_tasks, remove_task, remove_task2, complite_task
 
 
 @login_required()
-def new_task(request: HttpRequest, list_id: str) -> HttpResponse:
-    """list_id = id of ordered by id lists of this user
-    starts from 0
-    
-    After adding a task returns new task page with the same list, added task and
-    previous tasks
-    
-    if list_id is incorrect - add task to the last created list."""
-    
-    # get all user lists and current list number that user want to modify
-    lists, active_list = _get_lists_and_current_list_number(request, int(list_id))
-    
-    form_task = TaskForm(data=request.POST, for_list=lists[active_list])
+def add_task(request: HttpRequest) -> HttpResponse:
+    active_list, _ = get_active_user_list_and_lists_count(request)
+    list_ = get_ordered_lists(request)[active_list]
+    form_task = TaskForm(data=request.POST, for_list=list_)
     
     if form_task.is_valid():
         form_task.save()
-        lists, _ = _get_lists_and_current_list_number(request, 0)
-        return task_page_handler(request, lists, active_list)
+        return redirect('task_page')
     
-    return task_page_handler(request, lists, active_list, form_task=form_task)
-
-
-@login_required()
-def task_page(request: HttpRequest):
-    lists, active_list = _get_lists_and_current_list_number(request, 0)
-    return view_for_no_lists(request) if (len(lists) == 0) else task_page_handler(request, lists, active_list)
+    return task_page(request, form_task=form_task)
 
 
 def home(request: HttpRequest) -> HttpResponse:
@@ -44,34 +26,38 @@ def home(request: HttpRequest) -> HttpResponse:
 @login_required()
 def new_list(request: HttpRequest) -> HttpResponse:
     form = ListForm(data=request.POST, user=request.user)
-    lists, active_list = _get_lists_and_current_list_number(request, 0)
     
     if form.is_valid():
         form.save()
-        return task_page_handler(request, lists, active_list)
+        set_active_user_list(request, 0, increment_lists=True)
+        return redirect('task_page')
     
-    return task_page_handler(request, lists, active_list, form_list=form)
+    return task_page(request, form_list=form)
 
 
 @login_required()
 def activate_list(request: HttpRequest, list_id: str) -> HttpResponse:
-    lists, active_list = _get_lists_and_current_list_number(request, int(list_id))
-    return view_for_no_lists(request) if len(lists) == 0 else task_page_handler(request, lists, active_list)
+    set_active_user_list(request, int(list_id))
+    return redirect('task_page')
 
 
 @login_required()
-def task_page_handler(request: HttpRequest,
-                      lists: List_[List],
-                      active_list: int,
-                      form_task: TaskForm = None,
-                      form_list: ListForm = None) -> HttpResponse:
+def task_page(request: HttpRequest,
+              form_task: TaskForm = None,
+              form_list: ListForm = None) -> HttpResponse:
+    active_list, lists_count = get_active_user_list_and_lists_count(request)
+    
+    if lists_count == 0:
+        return view_for_no_lists(request)
+    
+    lists = get_ordered_lists(request)
     list_ = lists[active_list]
-    tasks_list = Task.objects.all().filter(list=list_).order_by('-id')
-    form_task, form_list = _initialize_forms_if_needed(form_task, form_list, list_, request.user)
+    tasks = get_ordered_tasks(list_)
+    form_task, form_list = initialize_forms_if_needed(form_task, form_list, list_, request.user)
     
     return render(request, 'lists/tasks.html', {'form_task': form_task,
                                                 'form_list': form_list,
-                                                'tasks_list': tasks_list,
+                                                'tasks': tasks,
                                                 'active': active_list,
                                                 'lists': lists,
                                                 'header': list_.text})
@@ -86,43 +72,25 @@ def view_for_no_lists(request: HttpRequest) -> HttpResponse:
 
 @login_required()
 def remove_list(request: HttpRequest, list_id: str) -> HttpResponse:
-    # TODO: rewrite
-    def delete_list(lists: List_[List], removed_list: id):
-        try:
-            lists[removed_list].delete()
-            print('point two')
-        except IndexError as e:
-            print('ERROR!')
-            pass
-    
-    
-    lists, removed_list = _get_lists_and_current_list_number(request, int(list_id))
-    delete_list(lists, removed_list)
-    
-    return view_for_no_lists(request) if len(lists) == 0 else task_page_handler(request, lists, 0)
+    remove_user(request, int(list_id))
+    return redirect('task_page')
 
 
-# better do not touch this
-def _get_lists_and_current_list_number(request: HttpRequest, list_id: int) -> Tuple[List_[List], int]:
-    """Returns user's lists list and current list user wants to modify if list_id is correct
-    else returns user's lists and 0"""
+@login_required()
+def remove_task(request: HttpRequest, task_id: str) -> HttpResponse:
+    active_list, lists_count = get_active_user_list_and_lists_count(request)
+    if lists_count == 0:
+        return view_for_no_lists(request)
     
-    lists = List.objects.filter(user=request.user).order_by('-id')
-    
-    # try to get correct list. If failed - returns 0
-    try:
-        lists[list_id]
-        active_list = list_id
-    except:
-        active_list = 0
-    return lists, active_list
+    remove_task2(request, active_list, int(task_id))
+    return redirect('task_page')
 
 
-def _initialize_forms_if_needed(form_task: TaskForm, form_list: ListForm, for_list: List, user: User) -> Tuple[
-    TaskForm, ListForm]:
-    if form_task is None:
-        form_task = TaskForm(for_list=for_list)
-    if form_list is None:
-        form_list = ListForm(user=user)
+@login_required()
+def mark_task(request: HttpRequest, task_id: str) -> HttpResponse:
+    active_list, lists_count = get_active_user_list_and_lists_count(request)
+    if lists_count == 0:
+        return view_for_no_lists(request)
     
-    return form_task, form_list
+    complite_task(request, active_list, int(task_id))
+    return redirect('task_page')

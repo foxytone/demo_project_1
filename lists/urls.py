@@ -15,14 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from .views import new_task, new_list, activate_list, task_page, remove_list
+from .views import add_task, new_list, activate_list, task_page, remove_list, remove_task, mark_task
 
 # without lead-slash
 urlpatterns = [
     path('', task_page, name='task_page'),
     path('add_list', new_list, name='add_list'),
+    path(r'add_task', add_task, name='add_task'),
     re_path(r'remove_list(?P<list_id>\d+)', remove_list, name='remove_list'),
     re_path(r'switch_list(?P<list_id>\d+)', activate_list, name='activate_list'),
-    re_path(r'add_task(?P<list_id>\d+)', new_task, name='new_task'),
+    re_path(r'remove_task(?P<task_id>\d+)', remove_task, name='remove_task'),
+    re_path(r'mark_task(?P<task_id>\d+)', mark_task, name='mark_task')
 
 ]

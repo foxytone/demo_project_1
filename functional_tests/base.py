@@ -23,7 +23,7 @@ class BaseTest(LiveServerTestCase):
 
     def setUp(self) -> None:
         options = ChromeOptions()
-        # options.add_argument('--headless')
+        options.add_argument('--headless')
         self.browser = webdriver.Chrome(options=options)
 
 

@@ -20,9 +20,9 @@
                                 {{ list.text }}
                             </span>
 
-                            <form class="float-right" action="remove_list{{ forloop.counter0 }}">
+                            <form class="float-right" action="remove_list{{ forloop.counter0 }}" id="remove_list_form">
                                 <button type="submit" class="btn btn-outline-danger float-right"
-                                        id="button{{ forloop.counter0 }}">X
+                                        id="remove_list_button{{ forloop.counter0 }}">X
                                 </button>
                             </form>
                         </a>
@@ -31,15 +31,32 @@
             </ul>
         </div>
         <div class="col-md-8">
-            <form method="post" class="form-group" action="add_task{{ active }}">
+            <form method="post" class="form-group" action="add_task">
                 {% csrf_token %}
                 {{ form_task|crispy }}
             </form>
             <table class="table table-sm">
-                {% for task in tasks_list %}
+                {% for task in tasks %}
                     {% cycle 'table-primary' 'table-default' as color silent %}
                     <tr>
-                        <td class="{{ color }}" id="task{{ forloop.counter0 }}">{{ task.text }}</td>
+
+                        <td class="{{ color }}" id="task{{ forloop.counter0 }}">
+                            <form class="float-left" action="mark_task{{ task.id }}" id="mark_task_form">
+                                <button type="submit" class="btn btn-outline-success float-left"
+                                        id="mark_task_button{{ forloop.counter0 }}">✓
+                                </button>
+                            </form>
+                            <span id="task_text">
+                                {% if task.complited %}<s>{% endif %}
+                                {{ task.text }}
+                                {% if task.complited %}</s>{% endif %}</span>
+                            <form class="float-right" action="remove_task{{ task.id }}" id="remove_task_form">
+                                <button type="submit" class="btn btn-outline-danger float-right"
+                                        id="remove_task_button{{ forloop.counter0 }}">X
+                                </button>
+                            </form>
+                        </td>
+
                     </tr>
                 {% endfor %}
             </table>

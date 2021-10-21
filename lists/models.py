@@ -9,8 +9,7 @@ from django.conf import settings
 class List(models.Model):
     text = models.CharField(max_length=60)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, default=None)
-    time_created = models.DateTimeField(auto_now_add=True, editable=False)
-
+    
     class Meta:
         unique_together = ('text', 'user')
 
@@ -18,7 +17,13 @@ class List(models.Model):
 class Task(models.Model):
     text = models.TextField(max_length=250)
     list = models.ForeignKey(List, on_delete=models.CASCADE, default=None)
-    time_created = models.DateTimeField(auto_now_add=True, editable=False)
-
+    complited = models.BooleanField(default=False)
+    
     class Meta:
         unique_together = ('text', 'list')
+
+
+class Data(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    last_active_list = models.IntegerField(default=-1)
+    lists_count = models.IntegerField(default=0)
